@@ -2,6 +2,38 @@
 nav .navbar-brand
 {
     font-size: xx-large;
+    font-family: "Gill Sans", sans-serif;
+}
+
+/* Forms */
+.btn.btn-primary {
+    width: 15em;
+}
+
+.section {
+    margin-top: 30px;
+}
+
+.form-container {
+    margin-top: 10px;
+}
+
+.form-container form {
+    margin-bottom: 5px;
+}
+
+.form-container p {
+    font-size: small;
+}
+
+.submit {  
+    border-radius: 10px;
+    border: 1px solid black;
+}
+
+/* Hidden */
+.hidden {
+    display: none;
 }
 
 /* Table */

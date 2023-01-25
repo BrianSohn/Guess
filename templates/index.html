@@ -5,5 +5,38 @@
 {% endblock %}
 
 {% block main %}
+    <div class="section">
+        <a class="btn btn-primary" id="create-group">Create Group</a>    
+        <div class="form-container hidden" id="create-group-desc">
+            <form action="/create-group" method="post">
+                <input type="text" placeholder="group name" autofocus name="name">
+                <input type="text" placeholder="code" name="code">
+                <button type="submit" class="submit">OK</button>
+            </form>
+            <div>
+                <p>Create a new group! Generate an invite code and share it with your friends.</p>
+            </div>
+        </div>
+    </div>
     
+    <div class="section">
+        <a class="btn btn-primary" id="join-group">Join Group</a>
+        <div class="form-container hidden" id="join-group-desc">
+            <form action="/join-group" method="post">
+                <input type="text" placeholder="group name" autofocus name="name">
+                <input type="text" placeholder="code" name="code">
+                <button type="submit" class="submit">OK</button>
+            </form>
+            <div>
+                <p>Join a group by entering the group name and invite code shared by your friend!</p>
+            </div>
+            
+        </div>
+    </div>
+    
+    <div class="section">
+            <a class="btn btn-primary" href="/login">My Groups</a>
+    </div>
+    
+    <script src="/static/click-to-show.js"></script>
 {% endblock %}

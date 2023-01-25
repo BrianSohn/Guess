@@ -32,7 +32,7 @@ def after_request(response):
 @login_required
 def index():
     '''display homepage'''
-    return apology("todo")
+    return render_template("index.html")
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -121,3 +121,63 @@ def register():
     else:
         return render_template("register.html")
 
+
+@app.route("/create-group", methods=["POST"])
+@login_required
+def create_group():
+    """Create a new group"""
+    group_name = request.form.get("name")
+    group_code = request.form.get("code")
+
+    # Ensure group name was submitted
+    if not group_name:
+        return apology("must provide group name")
+    
+    # Ensure group code was submitted
+    if not group_code:
+        return apology("must provide group code")
+    
+    # Ensure group with same name and code does not exist already
+    rows = db.execute("SELECT * FROM groups WHERE groupname = ? AND hash = ?", group_name, generate_password_hash(group_code))
+    if rows:
+        return apology("Group with identical name & code exists already")
+
+    # Insert group name and code into Groups table
+    group_id = db.execute("INSERT INTO groups (groupname, hash) VALUES (?, ?)", group_name, generate_password_hash(group_code))
+
+    # Insert group-user pair into userGroup table
+    db.execute("INSERT INTO userGroup (group_id, user_id) VALUES (?, ?)", group_id, session["user_id"])
+
+    # Redirect user to homepage
+    return redirect("/")
+
+
+@app.route("/join-group", methods=["POST"])
+@login_required
+def join_group():
+    """Join an existing group"""
+    group_name = request.form.get("name")
+    group_code = request.form.get("code")
+
+    # Ensure group name was submitted
+    if not group_name:
+        return apology("must provide group name")
+    
+    # Ensure group code was submitted
+    if not group_code:
+        return apology("must provide group code")
+
+    # Ensure group with same name and code exists already
+    rows = db.execute("SELECT * FROM groups WHERE groupname = ?", group_name)
+    rows = [row for row in rows if check_password_hash(row["hash"], group_code)]
+    if len(rows) != 1:
+        return apology("Incorrect group name / code")
+    
+    # Get group id
+    group_id = rows[0]["id"]
+
+    # Insert user into desired group in userGroup table
+    db.execute("INSERT INTO userGroup (group_id, user_id) VALUES (?, ?)", group_id, session["user_id"])
+
+    # Redirect user to homepage
+    return redirect("/")
