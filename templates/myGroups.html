@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    My Groups
+{% endblock %}
+
+{% block main %}
+    <div class="section">
+        <form action="/groups" method="post">
+            {% for row in rows %}
+            <input type="hidden" name="id" value="{{ row.id }}">
+            <input type="hidden" name="name" value="{{ row.groupname }}">    
+            <button type="submit" name="group" class="btn btn-primary">{{ row.groupname }}</button>
+            {% endfor %}
+        </form>
+    </div>
+{% endblock %}

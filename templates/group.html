@@ -1,0 +1,32 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Group: {{ name }}
+{% endblock %}
+
+{% block main %}
+    <h2>{{ name }}</h2>
+    <div> <!-- Container for grid? -->
+        <div> <!-- Leaderboard -->
+            <h4>Leaderboard</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <td>Rank</td>
+                        <td>Username</td>
+                        <td>Score</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for rank in ranking %}
+                        <tr>
+                            <td>{{ rank.ranking }}</td>
+                            <td>{{ rank.username}}</td>
+                            <td>{{ rank.score }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}

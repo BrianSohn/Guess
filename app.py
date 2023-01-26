@@ -149,7 +149,7 @@ def create_group():
     db.execute("INSERT INTO userGroup (group_id, user_id) VALUES (?, ?)", group_id, session["user_id"])
 
     # Redirect user to homepage
-    return redirect("/")
+    return redirect("/groups")
 
 
 @app.route("/join-group", methods=["POST"])
@@ -180,4 +180,32 @@ def join_group():
     db.execute("INSERT INTO userGroup (group_id, user_id) VALUES (?, ?)", group_id, session["user_id"])
 
     # Redirect user to homepage
-    return redirect("/")
+    return redirect("/groups")
+
+
+@app.route("/groups", methods=["GET", "POST"])
+@login_required
+def group():
+    
+    # User reached via POST, by clicking on a group button
+    if request.method == "POST": 
+        id = request.form.get("id")
+        name = request.form.get("name")
+        
+        query = """
+                SELECT u.username, ug.score, RANK() OVER (ORDER BY score DESC) AS ranking
+                FROM userGroup AS ug
+                JOIN users AS u ON ug.user_id = u.id
+                WHERE ug.group_id = ?
+                """
+        ranking = db.execute(query, id)
+
+        return render_template("group.html", name=name, ranking=ranking)
+    
+    # User reached via GET
+    else: 
+        '''show all groups user is joined in'''
+
+        rows = db.execute("SELECT groups.id, groups.groupname FROM userGroup JOIN groups ON userGroup.group_id = groups.id WHERE user_id = ?", session["user_id"])
+
+        return render_template("myGroups.html", rows=rows)
