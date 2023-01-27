@@ -6,6 +6,22 @@
 
 {% block main %}
     <h2>{{ name }}</h2>
+    <div>
+        <a class="btn btn-primary" id="create-game">Create Game</a>    
+        <div class="form-container hidden" id="create-game-desc">
+            <form action="/create-game" method="post">
+                <input type="text" placeholder="team1" name="team1">
+                <input type="text" placeholder="team2" name="team2">
+                <button type="submit" class="submit">OK</button>
+            </form>
+            <div>
+                <p>Create a new game!</p>
+            </div>
+        </div>
+    </div>
+    
+    <script src="/static/click-to-show-group.js"></script>
+
     <div> <!-- Container for grid? -->
         <div> <!-- Leaderboard -->
             <h4>Leaderboard</h4>
@@ -21,12 +37,43 @@
                     {% for rank in ranking %}
                         <tr>
                             <td>{{ rank.ranking }}</td>
-                            <td>{{ rank.username}}</td>
+                            <td>{{ rank.username }}</td>
                             <td>{{ rank.score }}</td>
                         </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
-    </div>
+
+        <div> <!--Games-->
+            <h4>Upcoming Games</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <td>Team1</td>
+                        <td>My guess</td>
+                        <td>Team2</td>
+                        <td>My guess</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for game in upcoming %}
+                        <tr>
+                            <td>{{ game.team1 }}</td>
+                            <td>{% if game.bet1 %}
+                                {{ game.bet1 }}
+                                {% endif %}
+                            </td>
+                            <td>{{ game.team2 }}</td>
+                            <td>{% if game.bet2 %}
+                                {{ game.bet2 }}
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>    
+
 {% endblock %}

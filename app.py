@@ -32,6 +32,10 @@ def after_request(response):
 @login_required
 def index():
     '''display homepage'''
+    
+    # Forget group info
+    session["group_id"] = None
+
     return render_template("index.html")
 
 
@@ -39,7 +43,7 @@ def index():
 def login():
     """Log user in"""
 
-    # Forget any user_id
+    # Forget any user_id and group_id
     session.clear()
 
     # User reached route via POST (as by submitting a form via POST)
@@ -75,7 +79,7 @@ def login():
 def logout():
     """Log user out"""
 
-    # Forget any user_id
+    # Forget any user_id and group_id
     session.clear()
 
     # Redirect user to login form
@@ -189,23 +193,62 @@ def group():
     
     # User reached via POST, by clicking on a group button
     if request.method == "POST": 
-        id = request.form.get("id")
-        name = request.form.get("name")
+        if not session.get("group_id"): 
+            name = request.form.get("name")
+            session["group_id"] = request.form.get("id")
+        else: 
+            name = db.execute("SELECT * FROM groups WHERE id = ?", session["group_id"])[0]["groupname"]
         
-        query = """
+        # Get leaderboard
+        query1 = """
                 SELECT u.username, ug.score, RANK() OVER (ORDER BY score DESC) AS ranking
                 FROM userGroup AS ug
                 JOIN users AS u ON ug.user_id = u.id
                 WHERE ug.group_id = ?
                 """
-        ranking = db.execute(query, id)
+        ranking = db.execute(query1, session["group_id"])
+        
+        # Get upcoming games
+        query2 = """
+                SELECT ug.game_id, g.team1, g.team2, ug.bet1, ug.bet2
+                FROM userGame AS ug
+                JOIN games AS g ON ug.game_id = g.id
+                WHERE g.group_id = ? AND ug.user_id = ? AND (g.result1 IS NULL OR g.result2 IS NULL)
+                """
 
-        return render_template("group.html", name=name, ranking=ranking)
+        upcoming = db.execute(query2, session["group_id"], session["user_id"])
+
+
+        return render_template("group.html", name=name, ranking=ranking, upcoming=upcoming)
     
     # User reached via GET
     else: 
         '''show all groups user is joined in'''
+        
+        # Forget previous group info
+        session["group_id"] = None
 
         rows = db.execute("SELECT groups.id, groups.groupname FROM userGroup JOIN groups ON userGroup.group_id = groups.id WHERE user_id = ?", session["user_id"])
 
         return render_template("myGroups.html", rows=rows)
+
+
+@app.route("/create-game", methods=["POST"])
+@login_required
+def create_game():
+    team1 = request.form.get("team1")
+    team2 = request.form.get("team2")
+
+    # Create game data in db
+    game_id = db.execute("INSERT INTO games (group_id, team1, team2) VALUES (?, ?, ?)", session["group_id"], team1, team2)
+    
+    # Create user-game data in db
+    user_group_data = db.execute("SELECT * FROM userGroup WHERE group_id = ?", session["group_id"])
+    users_in_group = [user["user_id"] for user in user_group_data]
+
+    for user in users_in_group:
+        db.execute("INSERT INTO userGame (game_id, user_id) VALUES (?, ?)", game_id, user)
+
+    #redirect to groups using POST
+    return redirect("/groups", code=307)
+

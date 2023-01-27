@@ -5,13 +5,14 @@
 {% endblock %}
 
 {% block main %}
+<h2>My Groups</h2>
     <div class="section">
+        {% for row in rows %}
         <form action="/groups" method="post">
-            {% for row in rows %}
             <input type="hidden" name="id" value="{{ row.id }}">
             <input type="hidden" name="name" value="{{ row.groupname }}">    
             <button type="submit" name="group" class="btn btn-primary">{{ row.groupname }}</button>
-            {% endfor %}
         </form>
+        {% endfor %}
     </div>
 {% endblock %}
