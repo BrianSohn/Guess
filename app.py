@@ -201,7 +201,7 @@ def group():
         
         # Get leaderboard
         query1 = """
-                SELECT u.username, ug.score, RANK() OVER (ORDER BY score DESC) AS ranking
+                SELECT u.username, ug.points, RANK() OVER (ORDER BY points DESC) AS ranking
                 FROM userGroup AS ug
                 JOIN users AS u ON ug.user_id = u.id
                 WHERE ug.group_id = ?
@@ -218,8 +218,17 @@ def group():
 
         upcoming = db.execute(query2, session["group_id"], session["user_id"])
 
+        # Get game results
+        query3 = """
+                SELECT ug.game_id, g.team1, g.team2, ug.bet1, ug.bet2, g.result1, g.result2
+                FROM userGame AS ug
+                JOIN games AS g ON ug.game_id = g.id
+                WHERE g.group_id = ? AND ug.user_id = ? AND (g.result1 IS NOT NULL AND g.result2 IS NOT NULL)
+                """
+        
+        history = db.execute(query3, session["group_id"], session["user_id"])
 
-        return render_template("group.html", name=name, ranking=ranking, upcoming=upcoming)
+        return render_template("group.html", name=name, ranking=ranking, upcoming=upcoming, history=history)
     
     # User reached via GET
     else: 
@@ -249,6 +258,82 @@ def create_game():
     for user in users_in_group:
         db.execute("INSERT INTO userGame (game_id, user_id) VALUES (?, ?)", game_id, user)
 
-    #redirect to groups using POST
+    # Redirect to groups using POST
+    return redirect("/groups", code=307)
+
+
+@app.route("/guess", methods=["POST"])
+@login_required
+def guess():
+    game_id = request.form.get("guess_game_id")
+    
+    # Validate inputs
+    try: 
+        team1_score = int(request.form.get("guess_team1"))
+        team2_score = int(request.form.get("guess_team2"))
+        if team1_score < 0 or team2_score < 0: 
+            return apology("Score must be a non-negative integer")
+    except ValueError: 
+        return apology("Score must be a non-negative integer")
+
+    if team1_score == "" or team2_score == "": 
+        return apology("Must guess for both teams!")
+
+    # Insert guess into userGame table
+    db.execute("UPDATE userGame SET bet1 = ?, bet2 = ? WHERE game_id = ? AND user_id = ?", team1_score, team2_score, game_id, session["user_id"])
+
+    # Redirect to groups using POST
+    return redirect("/groups", code=307)
+
+
+@app.route("/results", methods=["POST"])
+@login_required
+def result():
+    game_id = request.form.get("result_game_id")
+    
+    # Validate inputs
+    try: 
+        team1_score = int(request.form.get("result_team1"))
+        team2_score = int(request.form.get("result_team2"))
+        if team1_score < 0 or team2_score < 0: 
+            return apology("Result must be a non-negative integer")
+    except ValueError: 
+        return apology("Result must be a non-negative integer")
+
+    if team1_score == "" or team2_score == "": 
+        return apology("Must post result for both teams!")
+
+    # Insert result into games table
+    db.execute("UPDATE games SET result1 = ?, result2 = ? WHERE id = ?", team1_score, team2_score, game_id)
+
+    # Calculate points for everyone that made a guess
+    
+    if team1_score > team2_score: # team1 wins - increase point for those that betted that team1 will win
+        db.execute("UPDATE userGame SET points = 1 WHERE game_id = ? AND bet1 > bet2", game_id)
+        db.execute("UPDATE userGame SET points = 0 WHERE game_id = ? AND bet1 <= bet2", game_id)
+    elif team1_score < team2_score: # team2 wins - increase point for those that betted that team2 will win
+        db.execute("UPDATE userGame SET points = 1 WHERE game_id = ? AND bet1 < bet2", game_id)
+        db.execute("UPDATE userGame SET points = 0 WHERE game_id = ? AND bet1 >= bet2", game_id)
+    else: # draw - increase point for those that betted that the game will be a draw
+        db.execute("UPDATE userGame SET points = 1 WHERE game_id = ? AND bet1 = bet2", game_id)
+        db.execute("UPDATE userGame SET points = 0 WHERE game_id = ? AND bet1 != bet2", game_id)
+
+    # Update points for leaderboard in userGroup table
+    query = """
+            UPDATE userGroup
+            SET points = groupGameUser.user_point
+            FROM (
+                SELECT userGame.user_id, SUM(userGame.points) AS user_point
+                FROM userGame
+                JOIN games ON userGame.game_id = games.id
+                WHERE group_id = ?
+                GROUP BY userGame.user_id
+            ) AS groupGameUser
+            WHERE userGroup.group_id = ? AND userGroup.user_id = groupGameUser.user_id
+            """
+
+    db.execute(query, session["group_id"], session["group_id"])
+
+    # Redirect to groups using POST
     return redirect("/groups", code=307)
 
