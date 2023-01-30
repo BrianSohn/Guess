@@ -6,7 +6,7 @@
 
 {% block main %}
     <h2>{{ name }}</h2>
-    <div>
+    <div class="section">
         <a class="btn btn-primary" id="create-game">Create Game</a>    
         <div class="form-container hidden" id="create-game-desc">
             <form action="/create-game" method="post">
@@ -23,7 +23,7 @@
     <script src="/static/click-to-show-group.js"></script>
 
     <div> <!-- Container for grid? -->
-        <div> <!-- Leaderboard -->
+        <div class="section"> <!-- Leaderboard -->
             <h4>Leaderboard</h4>
             <table>
                 <thead>
@@ -45,87 +45,102 @@
             </table>
         </div>
 
-        <div> <!--Upcoming Games-->
+        <div class="section"> <!--Upcoming Games-->
             <h4>Upcoming Games</h4>
-            <table>
-                <thead>
-                    <tr>
-                        <td>Team1</td>
-                        <td>My guess</td>
-                        <td>Team2</td>
-                        <td>My guess</td>
-                        <td>Make a guess</td>
-                        <td>Post results</td>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for game in upcoming %}
-                        <tr>
-                            <td>{{ game.team1 }}</td>
-                            <td>{% if game.bet1 %}
-                                    {{ game.bet1 }}
-                                {% endif %}
-                            </td>
-                            <td>{{ game.team2 }}</td>
-                            <td>{% if game.bet2 %}
-                                    {{ game.bet2 }}
-                                {% endif %}
-                            </td>
-                            <td> <!--Make a guess!-->
-                                {% if not game.bet1 or not game.bet2 %}
-                                <form action="/guess" method="post">
-                                    <input type="hidden" name="guess_game_id" value="{{ game.game_id }}">
-                                    <input type="text" name="guess_team1" placeholder="Guess team1's score!">
-                                    <input type="text" name="guess_team2" placeholder="Guess team2's score!">
-                                    <button type="submit" class="submit">Make a guess</button>
-                                </form>
-                                {% endif %}
-                            </td>
-                            <td> <!--Post results-->
-                                <form action="/results" method="post">
-                                    <input type="hidden" name="result_game_id" value="{{ game.game_id }}">
-                                    <input type="text" name="result_team1" placeholder="Team1's result">
-                                    <input type="text" name="result_team2" placeholder="Team2's result">
-                                    <button type="submit" class="submit">Post results</button>
-                                </form>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div> <!--Game Results-->
-            <h4>Game Results</h4>
-            <table>
-                <thead>
-                    <td>Team1</td>
-                    <td>Result (My guess)</td>
-                    <td>Team2</td>
-                    <td>Result (My guess)</td>
-                    <td>Change results</td>
-                </thead>
-                <tbody>
-                    {% for game in history %}
-                        <tr>
-                            <td>{{ game.team1 }}</td>
-                            <td>{{ game.result1 }} ({{ game.bet1 }})</td>
-                            <td>{{ game.team2 }}</td>
-                            <td>{{ game.result2 }} ({{ game.bet2 }})</td>
-                            <td> <!--Post results-->
-                                <form action="/results" method="post">
-                                    <input type="hidden" name="result_game_id" value="{{ game.game_id }}">
-                                    <input type="text" name="result_team1" placeholder="Team1's result">
-                                    <input type="text" name="result_team2" placeholder="Team2's result">
-                                    <button type="submit" class="submit">Post results</button>
-                                </form>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
             
-        <div>
+            {% if not upcoming %}
+                <p>
+                    There are no upcoming games. Create one to make a guess with your friends!
+                </p>
+            {% else %}    
+                <table>
+                    <thead>
+                        <tr>
+                            <td>Team1</td>
+                            <td>My guess</td>
+                            <td>Team2</td>
+                            <td>My guess</td>
+                            <td>Make a guess</td>
+                            <td>Post results</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for game in upcoming %}
+                            <tr>
+                                <td>{{ game.team1 }}</td>
+                                <td>{% if game.bet1 %}
+                                        {{ game.bet1 }}
+                                    {% endif %}
+                                </td>
+                                <td>{{ game.team2 }}</td>
+                                <td>{% if game.bet2 %}
+                                        {{ game.bet2 }}
+                                    {% endif %}
+                                </td>
+                                <td> <!--Make a guess!-->
+                                    {% if not game.bet1 or not game.bet2 %}
+                                    <form action="/guess" method="post">
+                                        <input type="hidden" name="guess_game_id" value="{{ game.game_id }}">
+                                        <input type="text" name="guess_team1" placeholder="Guess team1's score!" class="in-table">
+                                        <input type="text" name="guess_team2" placeholder="Guess team2's score!" class="in-table">
+                                        <button type="submit" class="submit">Make a guess</button>
+                                    </form>
+                                    {% endif %}
+                                </td>
+                                <td> <!--Post results-->
+                                    <form action="/results" method="post">
+                                        <input type="hidden" name="result_game_id" value="{{ game.game_id }}">
+                                        <input type="text" name="result_team1" placeholder="Team1's result" class="in-table">
+                                        <input type="text" name="result_team2" placeholder="Team2's result" class="in-table">
+                                        <button type="submit" class="submit">Post results</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% endif %}
+        </div> 
 
+        <div class="section"><!--Game Results-->
+            <h4>Game Results</h4>
+            
+            {% if not history %}
+                <p>
+                    There are no games with known results. Post results of each game to determine who had the best guesses!  
+                </p>
+            {% else %}
+                <table>
+                    <thead>
+                        <td>Team1</td>
+                        <td>Result (My guess)</td>
+                        <td>Team2</td>
+                        <td>Result (My guess)</td>
+                        <td>Change results</td>
+                    </thead>
+                    <tbody>
+                        {% for game in history %}
+                            <tr>
+                                <td>{{ game.team1 }}</td>
+                                <td>{{ game.result1 }} ({{ game.bet1 }})</td>
+                                <td>{{ game.team2 }}</td>
+                                <td>{{ game.result2 }} ({{ game.bet2 }})</td>
+                                <td> <!--Post results-->
+                                    <form action="/results" method="post">
+                                        <input type="hidden" name="result_game_id" value="{{ game.game_id }}">
+                                        <input type="text" name="result_team1" placeholder="Team1's result" class="in-table">
+                                        <input type="text" name="result_team2" placeholder="Team2's result" class="in-table">
+                                        <button type="submit" class="submit">Post results</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% endif %}
         </div>
-    </div>    
+
+    </div>
+        
 
 {% endblock %}
