@@ -10,8 +10,8 @@
         <a class="btn btn-primary" id="create-game">Create Game</a>    
         <div class="form-container hidden" id="create-game-desc">
             <form action="/create-game" method="post">
-                <input type="text" placeholder="team1" name="team1">
-                <input type="text" placeholder="team2" name="team2">
+                <input type="text" placeholder="team1" name="team1" autocomplete="off">
+                <input type="text" placeholder="team2" name="team2" autocomplete="off">
                 <button type="submit" class="submit">OK</button>
             </form>
             <div>
@@ -68,21 +68,21 @@
                         {% for game in upcoming %}
                             <tr>
                                 <td>{{ game.team1 }}</td>
-                                <td>{% if game.bet1 %}
+                                <td>{% if game.bet1 is not none %}
                                         {{ game.bet1 }}
                                     {% endif %}
                                 </td>
                                 <td>{{ game.team2 }}</td>
-                                <td>{% if game.bet2 %}
+                                <td>{% if game.bet2 is not none %}
                                         {{ game.bet2 }}
                                     {% endif %}
                                 </td>
                                 <td> <!--Make a guess!-->
-                                    {% if not game.bet1 or not game.bet2 %}
+                                    {% if (game.bet1 is none) or (game.bet2 is none) %}
                                     <form action="/guess" method="post">
                                         <input type="hidden" name="guess_game_id" value="{{ game.game_id }}">
-                                        <input type="text" name="guess_team1" placeholder="Guess team1's score!" class="in-table">
-                                        <input type="text" name="guess_team2" placeholder="Guess team2's score!" class="in-table">
+                                        <input type="text" name="guess_team1" placeholder="Guess team1's score!" class="in-table" autocomplete="off">
+                                        <input type="text" name="guess_team2" placeholder="Guess team2's score!" class="in-table" autocomplete="off">
                                         <button type="submit" class="submit">Make a guess</button>
                                     </form>
                                     {% endif %}
@@ -90,8 +90,8 @@
                                 <td> <!--Post results-->
                                     <form action="/results" method="post">
                                         <input type="hidden" name="result_game_id" value="{{ game.game_id }}">
-                                        <input type="text" name="result_team1" placeholder="Team1's result" class="in-table">
-                                        <input type="text" name="result_team2" placeholder="Team2's result" class="in-table">
+                                        <input type="text" name="result_team1" placeholder="Team1's result" class="in-table" autocomplete="off">
+                                        <input type="text" name="result_team2" placeholder="Team2's result" class="in-table" autocomplete="off">
                                         <button type="submit" class="submit">Post results</button>
                                     </form>
                                 </td>
@@ -128,8 +128,8 @@
                                 <td> <!--Post results-->
                                     <form action="/results" method="post">
                                         <input type="hidden" name="result_game_id" value="{{ game.game_id }}">
-                                        <input type="text" name="result_team1" placeholder="Team1's result" class="in-table">
-                                        <input type="text" name="result_team2" placeholder="Team2's result" class="in-table">
+                                        <input type="text" name="result_team1" placeholder="Team1's result" class="in-table" autocomplete="off">
+                                        <input type="text" name="result_team2" placeholder="Team2's result" class="in-table" autocomplete="off">
                                         <button type="submit" class="submit">Post results</button>
                                     </form>
                                 </td>
