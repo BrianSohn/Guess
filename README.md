@@ -44,13 +44,13 @@ Creating and joining groups can be done in the homepage, which is created from *
 The *My Groups* page is created from *myGroups.html*. See route */groups*, with method GET, to check how this page is generated. When users select a group, they will be routed to */groups* with method POST, which will prompt users to a page created from *group.html*.
 
 ###### Creating Games
-Creating a game is done when a user submits a form within */group.html* to route */create-game* in *app.py*. This inserts a new row into the *games* table, as well as inserting one row for each member in the group to the *userGame* table.
+Creating a game is done when a user submits a form within *group.html* to route */create-game* in *app.py*. This inserts a new row into the *games* table, as well as inserting one row for each member in the group to the *userGame* table.
 
 ###### Guessing / Posting Game Results
-Guessing and posting game results are also performed through submitting a form in */group.html*. Check routes */guess* and */results* in *app.py*. When a user makes a guess for a game, it will update the *userGame* table so that it records the users guess for the game. When a game result is posted, it will update the *games* table so that its results are recorded. Then, 1 point will automatically be rewarded for users who guessed correctly by updating the *userGame* table, which will also be reflected in the *userGroup* table to calculate the leaderboard. 
+Guessing and posting game results are also performed through submitting a form in *group.html*. Check routes */guess* and */results* in *app.py*. When a user makes a guess for a game, it will update the *userGame* table so that it records the users guess for the game. When a game result is posted, it will update the *games* table so that its results are recorded. Then, 1 point will automatically be rewarded for users who guessed correctly by updating the *userGame* table, which will also be reflected in the *userGroup* table to calculate the leaderboard. 
 
 ###### Game Results
-Posted game results will be in the last section of */group.html*. 
+Posted game results will be in the last section of *group.html*. 
 
 ###### Leaderboard
-The leaderboard is generated in the first section of */group.html* and route */groups* in *app.py* with method POST. 
+The leaderboard is generated in the first section of *group.html* and route */groups* in *app.py* with method POST. 
